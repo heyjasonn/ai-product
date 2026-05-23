@@ -1,28 +1,28 @@
 # System Context
 
-Fill in the TODOs below with your actual tech stack. This file is auto-loaded at every Claude Code session start and used by SDD commands to recommend solutions that fit the system.
+Values marked `{{key}}` are loaded from `.claude/context/vars.json`. When reading this file, substitute each `{{key}}` with the matching value from vars.json. If a value is `null`, treat it as unknown/not yet decided.
 
 ## Tech Stack
 
-- Frontend: [TODO: e.g. Next.js 14, React 18, TailwindCSS]
-- Backend: [TODO: e.g. Node.js/Express, Laravel/PHP]
-- Database: [TODO: e.g. PostgreSQL, MySQL, MongoDB]
-- Auth: [TODO: e.g. JWT, NextAuth, Passport.js]
-- File storage: [TODO: e.g. S3, Cloudinary, local]
-- Search: [TODO: e.g. Elasticsearch, Algolia, none]
-- Cache: [TODO: e.g. Redis, none]
-- Deployment: [TODO: e.g. Vercel, AWS, DigitalOcean]
+- Frontend: {{frontend}}
+- Backend: {{backend}}
+- Database: {{database}}
+- Auth: {{auth}}
+- File storage: {{file_storage}}
+- Search: {{search}}
+- Cache: {{cache}}
+- Deployment: {{deployment}}
 
 ## Architecture Decisions
 
 - Apply flow: modal on same page (not page redirect)
-- [TODO: REST API vs GraphQL]
-- [TODO: SSR vs CSR vs hybrid]
-- [TODO: Monolith vs microservices]
-- [TODO: Any key libraries, e.g. react-hook-form, zod, prisma]
+- API style: {{api_style}}
+- Rendering strategy: {{ssr_strategy}}
+- Architecture: {{architecture_style}}
+- Key libraries: {{key_libraries}}
 
 ## Current Product Phase
 
-- [TODO: MVP / Beta / Production]
-- [TODO: Key features already built]
-- [TODO: Features in progress]
+- Phase: {{product_phase}}
+- Features already built: {{features_built}}
+- Features in progress: {{features_in_progress}}

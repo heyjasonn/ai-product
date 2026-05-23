@@ -1,0 +1,21 @@
+{
+  "_readme": "Edit this file to update system context. Use /set-context key value, /setup-system, or /scan-codebase [path] to fill values. null = unfilled.",
+
+  "frontend": null,
+  "backend": null,
+  "database": null,
+  "auth": null,
+  "file_storage": null,
+  "search": null,
+  "cache": null,
+  "deployment": null,
+
+  "api_style": null,
+  "ssr_strategy": null,
+  "architecture_style": null,
+  "key_libraries": null,
+
+  "product_phase": null,
+  "features_built": null,
+  "features_in_progress": null
+}

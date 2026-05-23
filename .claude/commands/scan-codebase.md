@@ -2,12 +2,12 @@
 
 You are a Tech Stack Detector.
 
-Scan a codebase directory and auto-populate `.claude/context/system.md` from what you find.
+Scan a codebase directory and auto-populate `.claude/context/vars.json` from what you find.
 
 Arguments: `$ARGUMENTS`
 
 - First token: path to the codebase root directory to scan.
-- If no path provided, ask the user for the path before proceeding.
+- If no path is provided, ask the user for the path before proceeding.
 
 ## Steps
 
@@ -18,69 +18,71 @@ Arguments: `$ARGUMENTS`
    - `composer.json` — PHP dependencies
    - `requirements.txt` or `pyproject.toml` — Python dependencies
    - `Gemfile` — Ruby dependencies
-   - `go.mod` — Go modules
+   - `go.mod` — Go modules and versions
 
    **Infrastructure files**
-   - `Dockerfile` — base image reveals runtime
+   - `Dockerfile` — base image reveals runtime and version
    - `docker-compose.yml` — services reveal database, cache, search
    - `.env.example` or `.env.sample` — variable names reveal integrations
+   - `k8s/` or `kubernetes/` — deployment platform confirmation
 
    **Config files**
-   - `next.config.js` / `nuxt.config.ts` / `vite.config.ts` — frontend framework config
+   - `next.config.js` / `nuxt.config.ts` / `vite.config.ts` — frontend framework
    - `tailwind.config.js` — confirms TailwindCSS
-   - `prisma/schema.prisma` — reveals database type and data model
-   - `drizzle.config.ts` — reveals database
-   - `vercel.json` / `netlify.toml` / `railway.json` — deployment platform
+   - `prisma/schema.prisma` — database type and data model
+   - `drizzle.config.ts` — database
+   - `vercel.json` / `netlify.toml` / `railway.toml` — deployment platform
 
-2. From what you find, infer:
-   - Frontend framework and version
-   - CSS/UI library
-   - Backend framework and language
-   - Database(s)
-   - Auth solution
-   - File storage
-   - Search solution
-   - Cache layer
-   - Deployment platform
-   - Key libraries (form handling, validation, ORM, etc.)
+2. Read the current `.claude/context/vars.json` — only propose filling keys whose value is `null`. Never overwrite keys that already have a value.
 
-3. Read the current `.claude/context/system.md` — only propose filling `[TODO]` fields. Do not overwrite fields already filled.
+3. From what you find, map to vars.json keys:
 
-4. Show findings in this format before writing anything:
+   | vars.json key | Detected from |
+   |---------------|--------------|
+   | `frontend` | package.json (react/vue/next/nuxt deps), next.config.js |
+   | `backend` | go.mod, package.json (express/fastify), composer.json, Dockerfile base image |
+   | `database` | docker-compose.yml (postgres/mysql/mongo services), prisma/schema.prisma, go.mod (database drivers) |
+   | `auth` | package.json (next-auth, passport), go.mod (oauth2), .env.example (AUTH_* vars) |
+   | `file_storage` | package.json (@aws-sdk, cloudinary), go.mod (google drive), .env.example (S3_*, GCS_*) |
+   | `search` | docker-compose.yml (elasticsearch), package.json (algoliasearch) |
+   | `cache` | docker-compose.yml (redis), go.mod (go-redis), package.json (ioredis) |
+   | `deployment` | vercel.json, Dockerfile + k8s/, railway.toml |
+   | `api_style` | routes structure, .env.example (API_BASE_URL pattern) |
+   | `key_libraries` | package.json / go.mod — notable dependencies |
+
+4. Show findings before writing anything:
 
 ```md
 ## Scan Results: [path]
 
 ### Detected Stack
 
-| Field | Detected Value | Source File |
-|-------|---------------|-------------|
-| Frontend | Next.js 14 | package.json |
-| CSS | TailwindCSS | tailwind.config.js |
-| Backend | Node.js / Express | package.json |
-| Database | PostgreSQL | docker-compose.yml |
-| Auth | NextAuth | package.json |
-| Storage | S3 (via @aws-sdk/client-s3) | package.json |
-| Cache | Redis | docker-compose.yml |
-| Deployment | Vercel | vercel.json |
+| Key | Detected Value | Source |
+|-----|---------------|--------|
+| backend | Go 1.25 / go-zero v1.9.2 | go.mod |
+| database | PostgreSQL | docker-compose.yml |
+| cache | Redis (go-redis/v9) | go.mod |
+| deployment | Kubernetes | k8s/ directory |
 
 ### Could Not Detect
 
-- Search solution (no Elasticsearch/Algolia config found)
-- Product phase (not derivable from code)
+| Key | Reason |
+|-----|--------|
+| frontend | No frontend files found |
+| product_phase | Not derivable from code |
 
-### Proposed system.md Updates
+### Proposed vars.json Updates
 
-[show exact lines to be written]
+[show the exact key-value pairs to be written]
 ```
 
-5. Ask: "Should I apply these to system.md?" before writing.
-6. For fields that could not be detected, ask the user to provide them or mark as `[TBD]`.
-7. Write the confirmed content to `.claude/context/system.md`.
+5. Ask: "Should I apply these to vars.json?" before writing.
+6. For keys that could not be detected, ask the user to provide them now or skip (they can use `/set-context` later).
+7. Write the confirmed values to `.claude/context/vars.json`.
 
 ## Rules
 
-- Never guess. If not found in a file, mark as "Could Not Detect" — do not invent values.
-- Only write fields with evidence from an actual file.
-- Prefer specific versions over generic names when package.json has them.
-- After writing, suggest running `/learn` to sync domain and conventions context.
+- Never guess. If not found in a file, list it under "Could Not Detect".
+- Never overwrite a key that already has a non-null value.
+- Prefer specific versions when available (e.g. `"Go 1.25.3 / go-zero v1.9.2"` not just `"Go"`).
+- After writing, suggest running `/learn` to sync `domain.md` and `conventions.md`.

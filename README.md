@@ -75,9 +75,10 @@ All commands live in `.claude/commands/` and are invoked with `/command-name [ar
 
 | Command | Arguments | Purpose |
 |---------|-----------|---------|
-| `/setup-system` | _(none)_ | Guided interview — asks ~12 questions in 4 batches, writes `system.md` |
-| `/scan-codebase` | Path to codebase root | Auto-detects tech stack from `package.json`, `docker-compose.yml`, `Dockerfile`, etc. |
-| `/learn` | _(none)_ | Scans all `/spec/*.md` files, extracts new patterns/entities/endpoints, proposes updates to context files |
+| `/setup-system` | _(none)_ | Guided interview — asks ~16 questions in 4 batches, writes `vars.json` |
+| `/scan-codebase` | Path to codebase root | Auto-detects tech stack from `go.mod`, `package.json`, `docker-compose.yml`, etc., writes `vars.json` |
+| `/set-context` | `key "value"` | Update a single field in `vars.json` inline |
+| `/learn` | _(none)_ | Scans all `/spec/*.md`, extracts new patterns/entities/endpoints, proposes updates to context files |
 
 ### Usage Examples
 
@@ -90,26 +91,56 @@ All commands live in `.claude/commands/` and are invoked with `/command-name [ar
 
 /refine-sdd spec/full-sdd-notification-centre.md add support for email notifications in addition to in-app
 
-/implement-from-spec spec/full-sdd-notification-centre.md Next.js
+/implement-from-spec spec/full-sdd-notification-centre.md
 
 /scan-codebase ../my-job-platform
+/set-context features_in_progress "search filters, employer analytics dashboard"
+/set-context product_phase "Production"
 ```
 
 ---
 
 ## System Context (How Claude Learns Your System)
 
-Three files in `.claude/context/` are auto-loaded at every Claude Code session start. They tell Claude what your system looks like so specs stay consistent.
+Four files in `.claude/context/` are auto-loaded at every Claude Code session start. They tell Claude what your system looks like so specs stay consistent.
 
 | File | What It Contains | How to Update |
 |------|-----------------|---------------|
-| `system.md` | Tech stack, frameworks, architecture decisions, product phase | Run `/setup-system` or `/scan-codebase`, or edit directly |
+| `vars.json` | Dynamic variables — tech stack, phase, features in progress | Commands write here; or edit directly in any editor |
+| `system.md` | Template that references `{{vars}}` from `vars.json` — auto-resolved at session start | Edit structure here; values come from `vars.json` |
 | `domain.md` | Domain entities (fields, types), key business rules | Run `/learn` after adding new specs, or edit directly |
 | `conventions.md` | UI/UX patterns, API patterns, naming conventions, spec writing rules | Run `/learn` after adding new specs, or edit directly |
 
-**Session start behaviour:** If `system.md` still has unfilled `[TODO]` fields, Claude shows a one-time notice at the start of the session listing which fields are missing and which command to run.
+### How vars.json works
 
-**Keeping context fresh:** Run `/learn` after adding any new spec. It scans `/spec/*.md`, extracts new patterns, and proposes additions to the context files — always asking for approval before writing.
+`system.md` uses `{{placeholder}}` syntax. At session start, Claude reads `vars.json` and substitutes each `{{key}}` with its value. If a value is `null`, it's treated as unknown.
+
+```json
+{
+  "backend": "Go 1.25.3 / go-zero v1.9.2",
+  "database": "PostgreSQL",
+  "features_in_progress": null
+}
+```
+
+Three ways to update a value:
+
+```bash
+# 1. Single field — fastest
+/set-context features_in_progress "search filters, employer analytics"
+
+# 2. Auto-detect from codebase
+/scan-codebase ../my-project
+
+# 3. Guided interview for all null fields
+/setup-system
+```
+
+Or edit `.claude/context/vars.json` directly in any text editor — it's plain JSON.
+
+**Session start behaviour:** If `vars.json` has any `null` values, Claude shows a one-time notice listing the missing keys and which command to run.
+
+**Keeping context fresh:** Run `/learn` after adding any new spec to update `domain.md` and `conventions.md` with new patterns.
 
 ---
 

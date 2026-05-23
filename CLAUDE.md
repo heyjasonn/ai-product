@@ -8,22 +8,28 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## System Context (auto-loaded)
 
+@.claude/context/vars.json
 @.claude/context/system.md
 @.claude/context/domain.md
 @.claude/context/conventions.md
 
+When reading `system.md`, substitute every `{{key}}` placeholder with the matching value from `vars.json`. If a key's value is `null`, treat that field as unknown.
+
 ## Session Start Checklist
 
-At the start of every session, silently check `.claude/context/system.md` for any lines containing `[TODO]`. If any are found, display this notice once before responding to anything else:
+At the start of every session, silently read `.claude/context/vars.json` and collect all keys whose value is `null`. If any exist, display this notice once before responding to anything else:
 
 ```
-⚠️  system.md has unfilled fields: [list the field names, e.g. Frontend, Database, Auth]
+⚠️  vars.json has unfilled fields: [list the null key names, e.g. frontend, database, auth]
 
-Run /setup-system to fill them via interview, or /scan-codebase [path] to auto-detect from your codebase.
-SDD commands will use generic recommendations until these are filled.
+Options:
+  /setup-system              ← guided interview
+  /scan-codebase [path]      ← auto-detect from codebase
+  /set-context key "value"   ← update a single field
+  edit .claude/context/vars.json directly
 ```
 
-Do not repeat this notice during the same session. If no `[TODO]` lines exist, proceed silently.
+Do not repeat this notice during the same session. If no `null` values exist, proceed silently.
 
 ---
 
@@ -76,8 +82,9 @@ Invoke these with `/command-name [arguments]` in Claude Code. Each command embed
 | `/refine-sdd` | Path to SDD + change request text | Updates file in-place, prints change summary |
 | `/implement-from-spec` | Path to Full SDD + optional tech stack | Implementation plan printed inline |
 | `/learn` | _(no arguments)_ | Scans `/spec/*.md`, proposes updates to `.claude/context/` |
-| `/setup-system` | _(no arguments)_ | Guided interview to fill `.claude/context/system.md` |
-| `/scan-codebase` | Path to codebase root | Auto-detects tech stack from files, fills `system.md` |
+| `/setup-system` | _(no arguments)_ | Guided interview to fill `vars.json` |
+| `/scan-codebase` | Path to codebase root | Auto-detects tech stack from files, fills `vars.json` |
+| `/set-context` | `key "value"` | Update a single field in `vars.json` inline |
 
 ## Agents
 
