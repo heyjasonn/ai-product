@@ -11,11 +11,15 @@
   "deployment": null,
 
   "api_style": null,
+  "api_base_url": null,
+  "api_auth_header": null,
   "ssr_strategy": null,
   "architecture_style": null,
   "key_libraries": null,
 
   "product_phase": null,
   "features_built": null,
-  "features_in_progress": null
+  "features_in_progress": null,
+
+  "planned_entities": null
 }

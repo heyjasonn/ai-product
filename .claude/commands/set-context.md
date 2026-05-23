@@ -26,13 +26,16 @@ Examples:
 | `search` | Search solution |
 | `cache` | Cache layer |
 | `deployment` | Deployment platform |
-| `api_style` | REST vs GraphQL, base URL, auth header format |
+| `api_style` | REST vs GraphQL |
+| `api_base_url` | Base URL and versioning format (e.g. `/api/v1/`) |
+| `api_auth_header` | Auth header format (e.g. `Authorization: Bearer <token>`) |
 | `ssr_strategy` | SSR / CSR / hybrid rendering decision |
 | `architecture_style` | Monolith / microservices / etc. |
 | `key_libraries` | Key libraries and versions |
 | `product_phase` | MVP / Beta / Production |
 | `features_built` | Summary of already-built features |
 | `features_in_progress` | Features currently being built |
+| `planned_entities` | Future domain entities planned (e.g. Notification, SavedSearch, Review) |
 
 ## Steps
 

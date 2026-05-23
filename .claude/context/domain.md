@@ -44,4 +44,4 @@ submitted_at
 
 ## Planned / Future Entities
 
-- [TODO: Add entities as the system grows, e.g. Notification, SavedSearch, Review]
+{{planned_entities}}

@@ -20,9 +20,9 @@ Pre-populated from existing specs. Update as new patterns are established. Run `
 
 ## API Patterns
 
-- [TODO: REST or GraphQL]
-- [TODO: Base URL, versioning format e.g. /api/v1/]
-- [TODO: Auth header format e.g. Authorization: Bearer <token>]
+- Style: {{api_style}}
+- Base URL: {{api_base_url}}
+- Auth header: {{api_auth_header}}
 - Existing endpoints (from specs):
   - `GET /jobs/:id` — fetch job detail
   - `GET /employers/:id` — fetch employer detail
