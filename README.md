@@ -1,66 +1,178 @@
 # Spec Driven Agents
 
-AI agents, commands, skills, and templates for Business Analysts, Product Owners, and Spec Driven Development.
+AI agents, commands, skills, and templates for Business Analysts, Product Owners, and Spec Driven Development — optimized for **Claude Code**.
 
-## Purpose
+## What This Is
 
-This repository helps BA/PO teams convert rough ideas into clear, implementation-ready specifications.
+This repository gives your team a structured workflow to turn rough feature ideas into complete, implementation-ready specifications. It works as a toolkit inside Claude Code: you run slash commands, Claude acts as a BA/PO/Planner/Reviewer, and the output is saved as markdown spec files.
 
-It supports:
+It also maintains a **system knowledge base** so Claude understands your actual tech stack, domain entities, and conventions — meaning every spec it generates fits your existing system instead of being generic.
 
-- Requirement discovery
-- Quick SDD generation
-- Full SDD generation
-- Spec validation
-- Spec refinement
-- Implementation planning
-- Acceptance criteria
-- Edge case analysis
-- Test case design
+---
+
+## Getting Started
+
+### 1. Clone and open in Claude Code
+
+```bash
+git clone <repo-url>
+cd ai-product
+claude  # open Claude Code in this directory
+```
+
+### 2. Fill in your system context
+
+On first session, Claude will show a notice if your system context is incomplete. Fill it using one of:
+
+```
+/setup-system          ← guided interview (recommended for new projects)
+/scan-codebase [path]  ← auto-detect from your existing codebase
+```
+
+This populates `.claude/context/system.md` with your tech stack, architecture decisions, and product phase. It's a one-time setup — Claude will use it in every session from that point on.
+
+### 3. Start writing specs
+
+```
+/quick-sdd add a saved jobs dashboard for job seekers
+```
+
+---
 
 ## Core Workflow
 
-```txt
+```
 Raw idea
   ↓
-/quick-sdd
+/quick-sdd          → /spec/quick-sdd-[feature].md
   ↓
-/full-sdd
+/full-sdd           → /spec/full-sdd-[feature].md
   ↓
-/validate-sdd
+/validate-sdd       → validation report (inline)
   ↓
-/refine-sdd
+/refine-sdd         → updates spec in-place
   ↓
-/implement-from-spec
+/implement-from-spec → implementation plan (inline)
 ```
+
+---
+
+## Commands
+
+All commands live in `.claude/commands/` and are invoked with `/command-name [arguments]` inside Claude Code.
+
+### SDD Workflow Commands
+
+| Command | Arguments | Output |
+|---------|-----------|--------|
+| `/quick-sdd` | Feature idea in plain text | `/spec/quick-sdd-[feature].md` |
+| `/full-sdd` | Path to Quick SDD + optional context | `/spec/full-sdd-[feature].md` |
+| `/validate-sdd` | Path to SDD + optional focus (`product` / `technical` / `qa` / `ux` / `api` / `data` / `all`) | Validation report inline |
+| `/refine-sdd` | Path to SDD + change request text | Updates file in-place, prints change summary |
+| `/implement-from-spec` | Path to Full SDD + optional tech stack | Implementation plan inline |
+
+### System Context Commands
+
+| Command | Arguments | Purpose |
+|---------|-----------|---------|
+| `/setup-system` | _(none)_ | Guided interview — asks ~12 questions in 4 batches, writes `system.md` |
+| `/scan-codebase` | Path to codebase root | Auto-detects tech stack from `package.json`, `docker-compose.yml`, `Dockerfile`, etc. |
+| `/learn` | _(none)_ | Scans all `/spec/*.md` files, extracts new patterns/entities/endpoints, proposes updates to context files |
+
+### Usage Examples
+
+```
+/quick-sdd add a notification centre for job application status updates
+
+/full-sdd spec/quick-sdd-notification-centre.md
+
+/validate-sdd spec/full-sdd-notification-centre.md technical
+
+/refine-sdd spec/full-sdd-notification-centre.md add support for email notifications in addition to in-app
+
+/implement-from-spec spec/full-sdd-notification-centre.md Next.js
+
+/scan-codebase ../my-job-platform
+```
+
+---
+
+## System Context (How Claude Learns Your System)
+
+Three files in `.claude/context/` are auto-loaded at every Claude Code session start. They tell Claude what your system looks like so specs stay consistent.
+
+| File | What It Contains | How to Update |
+|------|-----------------|---------------|
+| `system.md` | Tech stack, frameworks, architecture decisions, product phase | Run `/setup-system` or `/scan-codebase`, or edit directly |
+| `domain.md` | Domain entities (fields, types), key business rules | Run `/learn` after adding new specs, or edit directly |
+| `conventions.md` | UI/UX patterns, API patterns, naming conventions, spec writing rules | Run `/learn` after adding new specs, or edit directly |
+
+**Session start behaviour:** If `system.md` still has unfilled `[TODO]` fields, Claude shows a one-time notice at the start of the session listing which fields are missing and which command to run.
+
+**Keeping context fresh:** Run `/learn` after adding any new spec. It scans `/spec/*.md`, extracts new patterns, and proposes additions to the context files — always asking for approval before writing.
+
+---
+
+## Agents
+
+Agent definitions live in `.claude/agents/`. Their personas are embedded directly into the relevant commands — no separate activation needed in Claude Code.
+
+| Agent | Role | Used By |
+|-------|------|---------|
+| BA Agent | Clarifies requirements, identifies business rules and edge cases | `/quick-sdd`, `/full-sdd` |
+| PO Agent | Defines product goal, scope, user stories, acceptance criteria | `/quick-sdd`, `/full-sdd` |
+| Planner Agent | Breaks work into tasks, maps dependencies, sequences implementation | `/implement-from-spec` |
+| Reviewer Agent | Validates specs for completeness, ambiguity, conflicts, QA readiness | `/validate-sdd` |
+
+---
+
+## Skills
+
+Reusable analysis modules in `.claude/skills/`, invoked by agents during spec generation.
+
+| Skill | Purpose |
+|-------|---------|
+| `requirement-discovery` | Structured checklist to extract user, problem, goal, I/O, flow, rules, and edge cases from vague input |
+| `edge-case-analysis` | Identifies edge cases across 6 categories: input, permission, status, time-based, integration, data |
+| `acceptance-criteria` | Generates Given/When/Then criteria for happy path, validation, permission, status, and failure scenarios |
+| `test-case-design` | Structures test cases covering happy path, validation, permission, status transitions, edge cases, integration failures |
+
+---
 
 ## Repository Structure
 
-- `commands/`
-- `agents/`
-- `skills/`
-- `templates/`
-- `examples/`
-- `spec/`
+```
+.
+├── .claude/
+│   ├── commands/        ← Claude Code slash commands
+│   ├── context/         ← System knowledge base (auto-loaded at session start)
+│   │   ├── system.md    ← Tech stack, architecture (fill this first)
+│   │   ├── domain.md    ← Domain entities and business rules
+│   │   └── conventions.md ← UI/UX and API patterns
+│   ├── agents/          ← Agent role definitions
+│   ├── skills/          ← Reusable analysis skills
+│   └── templates/       ← Blank SDD templates
+├── .cursor/             ← Cursor equivalents (for teams using Cursor)
+│   ├── commands/
+│   ├── agents/
+│   ├── skills/
+│   └── templates/
+└── spec/                ← Generated spec output files
+```
 
-## Phase 1 Commands
+---
 
-- `/quick-sdd`
-- `/full-sdd`
-- `/validate-sdd`
-- `/refine-sdd`
-- `/implement-from-spec`
+## Working Conventions
 
-## Phase 1 Agents
+- **Specs are written in Vietnamese** (or your team's language — update `conventions.md`)
+- **Quick SDD first** — never jump to Full SDD without a Quick SDD unless explicitly skipped
+- **Draft first, ask later** — commands auto-fill from context; ask at most 3–5 questions only when information is missing
+- **Spec file naming** — `quick-sdd-[feature].md`, `full-sdd-[feature].md`, `refined-sdd-[feature].md`
+- **Reviewer severity gates** — do not approve specs with unresolved Critical or High findings
+- **`[NEW]` / `[NEW FIELD]` / `[NEW PATTERN]`** — commands flag deviations from existing system patterns so you can decide whether to adopt them
 
-- BA Agent
-- PO Agent
-- Planner Agent
-- Reviewer Agent
+---
 
-## Phase 1 Skills
+## For Cursor Users
 
-- Requirement Discovery
-- Edge Case Analysis
-- Acceptance Criteria
-- Test Case Design
+The `.cursor/` directory contains equivalent commands, agents, skills, and templates in Cursor's format. The workflow and file naming are identical — only the command invocation mechanism differs.
