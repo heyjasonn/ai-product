@@ -12,6 +12,13 @@ Arguments: `$ARGUMENTS`
 
 ## Steps
 
+0. **Context check:** Read `.claude/context/vars.json`. Check if any of these critical keys are `null`: `backend`, `architecture_style`, `deployment`. If any are null, print this notice then **continue without stopping**:
+   ```
+   ⚠️  Missing context: [list the null keys]
+   Architecture and task breakdown suggestions may not match your actual stack.
+   Fix with: /set-context key "value"  or  /setup-system
+   ```
+
 1. Read the Full SDD.
 2. Read `.claude/context/system.md` for the actual tech stack. Use it when suggesting architecture, frameworks, libraries, and tooling in sections 3 and 13. Do not suggest generic or hypothetical stacks — use what the system actually runs on.
 3. If the spec has unresolved Critical issues (missing flows, undefined data model, etc.), list blockers and stop — do not generate a plan for an incomplete spec.

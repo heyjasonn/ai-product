@@ -12,6 +12,13 @@ Arguments: `$ARGUMENTS`
 
 ## Steps
 
+0. **Context check:** Read `.claude/context/vars.json`. Check if any of these critical keys are `null`: `backend`, `database`, `api_style`, `api_base_url`. If any are null, print this notice then **continue without stopping**:
+   ```
+   ⚠️  Missing context: [list the null keys]
+   Sections 14 (API) and 21 (Implementation Notes) may contain generic recommendations.
+   Fix with: /set-context key "value"  or  /setup-system
+   ```
+
 1. Read the Quick SDD file.
 2. Read the system context:
    - `.claude/context/domain.md` — before writing section 13 (Data Requirements), cross-reference existing entities and reuse fields already defined. Only define new fields if the feature genuinely introduces them; mark with `[NEW FIELD]`.
